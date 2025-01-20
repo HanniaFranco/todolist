@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> To-Do List </title>
+    <link rel="stylesheet" type="text/css" href="./styles.css"/>
+</head>
+
+<body>
+    <h1 class="title"> TO-DO LIST </h1>
+
+    <div class="root">
+        <div class="input-container">
+            <form id="to-do-form" class="form">
+                <input type="text" name="element" id="element" placeholder="Ingresa una tarea"/>
+                <button type="submit" id="submit"> AGREGAR </button>
+            </form>
+        </div>
+        <div class="to-do-list-container">
+            <ul id="to-do-list" class="to-do-list"> </ul>
+        </div>
+    </div>
+
+    <script>
+        //PD. Quería hacerlo con funciones, pero no sabía si se podía, así que lo hice así:)
+        const form = document.getElementById('to-do-form');
+        const toDoList = document.getElementById('to-do-list');
+
+        //Cargar tareas desde localStorage cuando la página se carga.
+        document.addEventListener('DOMContentLoaded', () => {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+            for (let i = 0; i < tasks.length; i++) {
+                const task = tasks[i];
+                const li = document.createElement('li');
+                li.classList.add('to-do-list-item');
+
+                const p = document.createElement('p');
+                p.textContent = task;
+
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Editar';
+                editButton.classList.add('edit-button'); 
+                editButton.addEventListener('click', () => {
+                    const newValue = prompt('Editar tarea:', p.textContent);
+
+                    if (newValue !== null && newValue.trim() !== '') {
+                        p.textContent = newValue;
+
+                        //Actualiza el valor en la lista.
+                        tasks[i] = newValue; 
+                        //Actualiza localStorage.
+                        localStorage.setItem('tasks', JSON.stringify(tasks)); 
+                    }
+                });
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'X';
+                deleteButton.classList.add('delete-button'); 
+
+                deleteButton.addEventListener('click', () => {
+                    toDoList.removeChild(li);
+                    //Eliminar de la lista.
+                    tasks.splice(i, 1); 
+                    //Actualiza localStorage.
+                    localStorage.setItem('tasks', JSON.stringify(tasks)); 
+                });
+
+                li.appendChild(p);
+                li.appendChild(editButton);
+                li.appendChild(deleteButton);
+                toDoList.appendChild(li);
+            }
+        });
+
+        //Para gregar una nueva tarea.
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const value = event.target.element.value;
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+            if (value.trim() !== '') {
+                const li = document.createElement('li');
+                li.classList.add('to-do-list-item');
+
+                const p = document.createElement('p');
+                p.textContent = value;
+
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Editar';
+                editButton.classList.add('edit-button'); 
+                editButton.addEventListener('click', () => {
+                    const newValue = prompt('Editar tarea:', p.textContent);
+                    
+                    if (newValue !== null && newValue.trim() !== '') {
+                        p.textContent = newValue;
+                        tasks[tasks.indexOf(value)] = newValue;
+                        localStorage.setItem('tasks', JSON.stringify(tasks));
+                    }
+                });
+
+                //Para eliminar una tarea.
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'X';
+                deleteButton.classList.add('delete-button');
+
+                deleteButton.addEventListener('click', () => {
+                    toDoList.removeChild(li);
+                    tasks = tasks.filter(t => t !== value);
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                });
+
+                li.appendChild(p);
+                li.appendChild(editButton);
+                li.appendChild(deleteButton);
+                toDoList.appendChild(li);
+
+                tasks.push(value);
+                //Guardamos en el localStorage.
+                localStorage.setItem('tasks', JSON.stringify(tasks)); 
+                //Limpiamos el input.
+                event.target.element.value = ''; 
+            }
+        });
+    </script>
+</body>
+</html>
